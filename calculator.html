@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+        }
+
+        .container {
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            background: #fff;
+            width: 350px;
+            margin: 30px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff5722;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+            transition: transform 0.5s ease;
+        }
+
+        .eyes {
+            display: inline-block;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .calculator {
+            background: #fff;
+        }
+
+        .display {
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 30px;
+            text-align: right;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+        }
+
+        .btn {
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #dce1e6;
+            transform: scale(1.1);
+        }
+
+        .operator {
+            background-color: #ff9f00;
+            color: white;
+        }
+
+        .operator:hover {
+            background-color: #f76b00;
+        }
+
+        .equal {
+            background-color: #4CAF50;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .equal:hover {
+            background-color: #45a049;
+        }
+
+        .delete {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .delete:hover {
+            background-color: #d32f2f;
+        }
+
+        #display:disabled {
+            color: #333;
+        }
+
+        #display {
+            font-size: 2em;
+        }
+
+        .open-eyes {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .closed-eyes {
+            transform: scale(0.8);
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo & Calculator Name -->
+        <div class="logo">Smart Calc</div>
+
+        <!-- Monkey Emoji -->
+        <div class="emoji">
+            <span id="eyes" class="eyes closed-eyes">🐵</span>
+        </div>
+
+        <!-- Calculator Screen -->
+        <div class="calculator">
+            <input type="text" id="display" disabled class="display" placeholder="0">
+            
+            <!-- Calculator Buttons -->
+            <div class="buttons">
+                <button class="btn" data-value="7">7</button>
+                <button class="btn" data-value="8">8</button>
+                <button class="btn" data-value="9">9</button>
+                <button class="btn operator" data-value="/">/</button>
+
+                <button class="btn" data-value="4">4</button>
+                <button class="btn" data-value="5">5</button>
+                <button class="btn" data-value="6">6</button>
+                <button class="btn operator" data-value="*">*</button>
+
+                <button class="btn" data-value="1">1</button>
+                <button class="btn" data-value="2">2</button>
+                <button class="btn" data-value="3">3</button>
+                <button class="btn operator" data-value="-">-</button>
+
+                <button class="btn" data-value="0">0</button>
+                <button class="btn" data-value=".">.</button>
+                <button class="btn delete" data-value="delete">←</button>
+                <button class="btn operator" data-value="+">+</button>
+
+                <button class="btn equal" data-value="=">=</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let buttons = document.querySelectorAll('.btn');
+        let emojiEyes = document.getElementById('eyes');
+
+        // Function to update emoji eyes when typing
+        function moveEyes() {
+            emojiEyes.classList.remove('closed-eyes');
+            emojiEyes.classList.add('open-eyes');
+            clearTimeout(window.emojiTimeout);
+            window.emojiTimeout = setTimeout(() => {
+                emojiEyes.classList.remove('open-eyes');
+                emojiEyes.classList.add('closed-eyes');
+            }, 2000); // Close eyes after 2 seconds of inactivity
+        }
+
+        // Event listener for button clicks
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                let value = button.getAttribute('data-value');
+
+                if (value === 'C') {
+                    display.value = ''; // Clear screen
+                } else if (value === 'delete') {
+                    display.value = display.value.slice(0, -1); // Delete last character
+                } else if (value === '=') {
+                    try {
+                        display.value = eval(display.value); // Calculate result
+                    } catch (error) {
+                        display.value = 'Error';
+                    }
+                } else {
+                    display.value += value; // Append value to display
+                }
+
+                moveEyes(); // Trigger eye movement when typing
+            });
+        });
+
+        // Keyboard support for the calculator
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+
+            // Allow input of numbers, operators, and other characters
+            if ('0123456789/*-+.' === key) {
+                display.value += key;
+            } else if (key === 'Enter') {
+                try {
+                    display.value = eval(display.value);
+                } catch (error) {
+                    display.value = 'Error';
+                }
+            } else if (key === 'Backspace') {
+                display.value = display.value.slice(0, -1);
+            } else if (key === 'Escape') {
+                display.value = '';
+            }
+
+            moveEyes(); // Trigger eye movement for keyboard input
+        });
+    </script>
+</body>
+</html>
